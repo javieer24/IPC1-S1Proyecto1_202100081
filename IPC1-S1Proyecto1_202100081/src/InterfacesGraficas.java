@@ -25,8 +25,8 @@ public class InterfacesGraficas {
     static double ingresosTotales=0.00;
     static int totalEnviosGeneral=0;
 
-    static String correoAdmin="ipc1_202100081@ipc1delivery.com";
-    static String passAdmin="202100081";
+    static String correoAdmin="ipc@gmail.com";
+    static String passAdmin="1234";
     static int numeroFactura=0;
 
 
@@ -269,6 +269,16 @@ public class InterfacesGraficas {
         return false;
     }
 
+    public static boolean elCorreoExiste(String correo){
+        for (Usuario usuario : usuarios) {
+            if (Objects.equals(usuario.getCorreo(), correo) ) {
+                // El correo existe, no debe permitir el registro
+                return false;
+            }
+        }
+        return true;
+    }
+
     public static String devolverDpiLoggeado(String correo,String pass){
         for (Usuario usuario : usuarios) {
             if (Objects.equals(usuario.getCorreo(), correo) && Objects.equals(usuario.getContasenia(), pass)) {
@@ -285,6 +295,125 @@ public class InterfacesGraficas {
             }
         }
         return "";
+    }
+
+    public static Region devolverLaRegion(String codigoRegion){
+        for (Region region : regiones) {
+            if (Objects.equals(region.getCodigoRegion(), codigoRegion)) {
+                return region;
+            }
+        }
+        return null;
+    }
+
+    public static void actualizarRegion(String codigoRegion,String atributo,String nuevaInfo){
+        for (Region region : regiones) {
+            if (Objects.equals(region.getCodigoRegion(), codigoRegion)) {
+                switch (atributo){
+                    case "Nombre":
+                        region.setNombreRegion(nuevaInfo);
+                        break;
+                    case "PrecioNormal":
+                        region.setPrecioNormal(Double.parseDouble(nuevaInfo));
+                        break;
+                    case "PrecioEspecial":
+                        region.setPrecioEspecial(Double.parseDouble(nuevaInfo));
+                        break;
+                }
+
+            }
+        }
+    }
+
+    public static void actualizarDepartamento(String codigoDep,String nuevaInfo){
+        for (Departamento dep : departamentos) {
+            if (Objects.equals(dep.getNombreDepartamento(), codigoDep)) {
+                dep.setNombreDepartamento(nuevaInfo);
+            }
+        }
+    }
+
+    public static void actualizarMunicipio(String nombreMun,String nuevaInfo){
+        for (Municipio mun : municipios) {
+            if (Objects.equals(mun.getNombreMunicipio(), nombreMun)) {
+                mun.setNombreMunicipio(nuevaInfo);
+            }
+        }
+
+    }
+
+    public static void eliminarRegion(String codigoRegion){
+        for (Region region : regiones) {
+            if (Objects.equals(region.getCodigoRegion(), codigoRegion)) {
+                regiones.remove(region);
+                break;
+            }
+        }
+        eliminarDepartamentosPertenecientesRegion(codigoRegion);
+    }
+
+    public static void eliminarDepartamento(String codigoDep){
+        for (Departamento dep : departamentos) {
+            if (Objects.equals(dep.getCodigoDepartamento(), codigoDep)) {
+                departamentos.remove(dep);
+                break;
+            }
+        }
+        eliminarMunicipiosAsociadosDepartamento(codigoDep);
+    }
+
+    public static void eliminarMunicipio(String codigoMun){
+        for (Municipio mun : municipios) {
+            if (Objects.equals(mun.getNombreMunicipio(), codigoMun)) {
+                municipios.remove(mun);
+                break;
+            }
+        }
+    }
+
+    public static void eliminarDepartamentosPertenecientesRegion(String codigoRegion){
+        boolean yaEliminamosTodos=false;
+        while (!yaEliminamosTodos){
+            int contadorDepsConRegionAsociada=0;
+            for (Departamento departamento : departamentos) {
+                if (Objects.equals(departamento.getCodigoRegion(), codigoRegion)) {
+                    contadorDepsConRegionAsociada++;
+                }
+            }
+            if(contadorDepsConRegionAsociada>0){
+                for (Departamento departamento : departamentos) {
+                    if (Objects.equals(departamento.getCodigoRegion(), codigoRegion)) {
+                        eliminarMunicipiosAsociadosDepartamento(departamento.getCodigoDepartamento());
+                        departamentos.remove(departamento);
+                        break;
+                    }
+                }
+            }else if(contadorDepsConRegionAsociada==0){
+                yaEliminamosTodos=true;
+            }
+        }
+    }
+
+    public static void eliminarMunicipiosAsociadosDepartamento(String codigoDep){
+        boolean yaEliminamosTodos=false;
+        while (!yaEliminamosTodos){
+            int contadorMunConDepAsociado=0;
+            for (Municipio municipio : municipios) {
+                if (Objects.equals(municipio.getCodigoDepartamento(), codigoDep)) {
+                    contadorMunConDepAsociado++;
+                }
+            }
+            if(contadorMunConDepAsociado>0){
+                for (Municipio municipio : municipios) {
+                    if (Objects.equals(municipio.getCodigoDepartamento(), codigoDep)) {
+                        municipios.remove(municipio);
+                        break;
+                    }
+                }
+            }else if(contadorMunConDepAsociado==0){
+                yaEliminamosTodos=true;
+            }
+        }
     }
 
     public static double  devolverPrecioRegion(String codigoDepartamento, String tipoPrecio){
@@ -309,43 +438,16 @@ public class InterfacesGraficas {
 
     public static Object[][] devolverDatosRegiones(){
         Object[][] matrizRegiones;
-        matrizRegiones = new Object[6][5];
-        matrizRegiones[0][0]=regiones.get(0).getCodigoRegion();
-        matrizRegiones[0][1]=regiones.get(0).getNombreRegion();
-        matrizRegiones[0][2]=regiones.get(0).getPrecioNormal();
-        matrizRegiones[0][3]=regiones.get(0).getPrecioEspecial();
-        matrizRegiones[0][4]=regiones.get(0).getCantidadEnvios();
-
-        matrizRegiones[1][0]=regiones.get(1).getCodigoRegion();
-        matrizRegiones[1][1]=regiones.get(1).getNombreRegion();
-        matrizRegiones[1][2]=regiones.get(1).getPrecioNormal();
-        matrizRegiones[1][3]=regiones.get(1).getPrecioEspecial();
-        matrizRegiones[1][4]=regiones.get(1).getCantidadEnvios();
-
-        matrizRegiones[2][0]=regiones.get(2).getCodigoRegion();
-        matrizRegiones[2][1]=regiones.get(2).getNombreRegion();
-        matrizRegiones[2][2]=regiones.get(2).getPrecioNormal();
-        matrizRegiones[2][3]=regiones.get(2).getPrecioEspecial();
-        matrizRegiones[2][4]=regiones.get(2).getCantidadEnvios();
-
-        matrizRegiones[3][0]=regiones.get(3).getCodigoRegion();
-        matrizRegiones[3][1]=regiones.get(3).getNombreRegion();
-        matrizRegiones[3][2]=regiones.get(3).getPrecioNormal();
-        matrizRegiones[3][3]=regiones.get(3).getPrecioEspecial();
-        matrizRegiones[3][4]=regiones.get(3).getCantidadEnvios();
+        matrizRegiones = new Object[regiones.size()][5];
+        for(int i=0;i<regiones.size();i++){
+            matrizRegiones[i][0]=regiones.get(i).getCodigoRegion();
+            matrizRegiones[i][1]=regiones.get(i).getNombreRegion();
+            matrizRegiones[i][2]=regiones.get(i).getPrecioNormal();
+            matrizRegiones[i][3]=regiones.get(i).getPrecioEspecial();
+            matrizRegiones[i][4]=regiones.get(i).getCantidadEnvios();
+        }
 
 
-        matrizRegiones[4][0]=regiones.get(4).getCodigoRegion();
-        matrizRegiones[4][1]=regiones.get(4).getNombreRegion();
-        matrizRegiones[4][2]=regiones.get(4).getPrecioNormal();
-        matrizRegiones[4][3]=regiones.get(4).getPrecioEspecial();
-        matrizRegiones[4][4]=regiones.get(4).getCantidadEnvios();
-
-        matrizRegiones[5][0]=regiones.get(5).getCodigoRegion();
-        matrizRegiones[5][1]=regiones.get(5).getNombreRegion();
-        matrizRegiones[5][2]=regiones.get(5).getPrecioNormal();
-        matrizRegiones[5][3]=regiones.get(5).getPrecioEspecial();
-        matrizRegiones[5][4]=regiones.get(5).getCantidadEnvios();
 
         return matrizRegiones;
     }
@@ -582,7 +684,7 @@ public class InterfacesGraficas {
         JFrame frameInicioDeSesion = new JFrame("Usac-Delivery");
         frameInicioDeSesion.setLayout(null);
         frameInicioDeSesion.setVisible(true);
-        frameInicioDeSesion.setResizable(false);
+        frameInicioDeSesion.setResizable(true);
         frameInicioDeSesion.getContentPane().setBackground(Color.LIGHT_GRAY);
         frameInicioDeSesion.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         //Le agreamos un tamaño al frame login
@@ -697,7 +799,7 @@ public class InterfacesGraficas {
         JFrame registroDeUsuario = new JFrame("USAC-DELIVERY");
         registroDeUsuario.setLayout(null);
         registroDeUsuario.setVisible(true);
-        registroDeUsuario.setResizable(false);
+        registroDeUsuario.setResizable(true);
         registroDeUsuario.getContentPane().setBackground(Color.LIGHT_GRAY);
         registroDeUsuario.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
         Toolkit myScreen= Toolkit.getDefaultToolkit();
@@ -997,8 +1099,12 @@ public class InterfacesGraficas {
                         ArrayList<Tarjeta> misTarjetas = new ArrayList<>();
                         ArrayList<DatoFacturacion> misDatosFacturacion = new ArrayList<>();
                         ArrayList<Envio> misEnvios = new ArrayList<>();
-                        usuarios.add(new Usuario(campoCorreo.getText(),campoContra.getText(),comboboxRol.getSelectedItem().toString(),campoNombre.getText(),campoApellido.getText(),campoDpi.getText(),campoDia.getText()+"/"+campoMes.getText()+"/"+campoAnio.getText(),comboboxGenero.getSelectedItem().toString(),comboboxPais.getSelectedItem().toString(),campoSobreNombre.getText(),campoTelefono.getText(),campoFotografia.getText(),0,misTarjetas,misDatosFacturacion,misEnvios));
-                        JOptionPane.showMessageDialog(null,"<html><p style=\"color:blue; font:10px;\">Usuario Registrado Con Éxito</p></html>" );
+                        if(elCorreoExiste(campoCorreo.getText())){
+                            usuarios.add(new Usuario(campoCorreo.getText(),campoContra.getText(),comboboxRol.getSelectedItem().toString(),campoNombre.getText(),campoApellido.getText(),campoDpi.getText(),campoDia.getText()+"/"+campoMes.getText()+"/"+campoAnio.getText(),comboboxGenero.getSelectedItem().toString(),comboboxPais.getSelectedItem().toString(),campoSobreNombre.getText(),campoTelefono.getText(),campoFotografia.getText(),0,misTarjetas,misDatosFacturacion,misEnvios));
+                            JOptionPane.showMessageDialog(null,"<html><p style=\"color:blue; font:10px;\">Usuario Registrado Con Éxito</p></html>" );
+                        }else{
+                            JOptionPane.showMessageDialog(null,"<html><p style=\"color:red; font:10px;\">El correo ya está utilizado en otra cuenta!!</p></html>" );
+                        }
                         registroDeUsuario.dispose();
                         try {
                             inicioDeSesion();
@@ -1046,7 +1152,7 @@ public class InterfacesGraficas {
         JFrame frameVistaAdmin = new JFrame("Usac-Delivery");
         frameVistaAdmin.setLayout(null);
         frameVistaAdmin.setVisible(true);
-        frameVistaAdmin.setResizable(false);
+        frameVistaAdmin.setResizable(true);
         frameVistaAdmin.getContentPane().setBackground(Color.LIGHT_GRAY);
         frameVistaAdmin.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
         //Le agreamos un tamaño al frame login
@@ -1186,7 +1292,7 @@ public class InterfacesGraficas {
         JFrame frameManejoDeKioscos = new JFrame("Usac-Delivery");
         frameManejoDeKioscos.setLayout(null);
         frameManejoDeKioscos.setVisible(true);
-        frameManejoDeKioscos.setResizable(false);
+        frameManejoDeKioscos.setResizable(true);
         frameManejoDeKioscos.getContentPane().setBackground(Color.LIGHT_GRAY);
         frameManejoDeKioscos.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
         //Le agreamos un tamaño al frame login
@@ -1299,15 +1405,16 @@ public class InterfacesGraficas {
 
         //Fuente utilizada
         Font fuenteDeTexto =new Font("SansSerif",Font.BOLD,30);
+        Font fuenteDeTexto2 =new Font("SansSerif",Font.BOLD,12);
         // Creación del frame
         JFrame frameManejoDepartamentos = new JFrame("Usac-Delivery");
         frameManejoDepartamentos.setLayout(null);
         frameManejoDepartamentos.setVisible(true);
-        frameManejoDepartamentos.setResizable(false);
+        frameManejoDepartamentos.setResizable(true);
         frameManejoDepartamentos.getContentPane().setBackground(Color.LIGHT_GRAY);
         frameManejoDepartamentos.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
         //Le agreamos un tamaño al frame login
-        frameManejoDepartamentos.setSize(700,550);
+        frameManejoDepartamentos.setSize(900,800);
 
 
 
@@ -1369,7 +1476,7 @@ public class InterfacesGraficas {
         JButton botonRegresar = new JButton("Volver");
         botonRegresar.setLayout(null);
         botonRegresar.setVisible(true);
-        botonRegresar.setBounds(80, 425, 200, 60);
+        botonRegresar.setBounds(230, 700, 200, 60);
         botonRegresar.setFont(fuenteDeTexto);
         botonRegresar.setBackground(Color.WHITE);
         botonRegresar.addMouseListener(new MouseAdapter(){
@@ -1388,13 +1495,14 @@ public class InterfacesGraficas {
         JButton botonAgregarDepartamento = new JButton("Agregar");
         botonAgregarDepartamento.setLayout(null);
         botonAgregarDepartamento.setVisible(true);
-        botonAgregarDepartamento.setBounds(305, 425, 300, 60);
+        botonAgregarDepartamento.setBounds(190, 425, 300, 60);
         botonAgregarDepartamento.setFont(fuenteDeTexto);
         botonAgregarDepartamento.setBackground(Color.WHITE);
         botonAgregarDepartamento.addMouseListener(new MouseAdapter(){
             public void mouseClicked(MouseEvent e){
                 if(!Objects.equals(campoNombre.getText(), "") && !Objects.equals(campoCodigoDepartamento.getText(), "")){
-                    departamentos.add(new Departamento(comboboxRegion.getSelectedItem().toString(),devolverNombreRegion(comboboxRegion.getSelectedItem().toString()),campoCodigoDepartamento.getText(),campoNombre.getText()));
+                    Region unaRegion=devolverLaRegion(comboboxRegion.getSelectedItem().toString());
+                    departamentos.add(new Departamento(comboboxRegion.getSelectedItem().toString(),devolverNombreRegion(comboboxRegion.getSelectedItem().toString()),unaRegion.getPrecioNormal(),unaRegion.getPrecioEspecial(),unaRegion.getCantidadEnvios(),campoCodigoDepartamento.getText(),campoNombre.getText()));
                     JOptionPane.showMessageDialog(null,"<html><p style=\"color:blue; font:10px;\">Departamento Registrado con éxito!!</p></html>" );
                     frameManejoDepartamentos.dispose();
                     try {
@@ -1409,6 +1517,100 @@ public class InterfacesGraficas {
         });
         frameManejoDepartamentos.add(botonAgregarDepartamento);
 
+        JLabel labelCodigoRegion = new JLabel("Cod. Dep:");
+        labelCodigoRegion.setLayout(null);
+        labelCodigoRegion.setVisible(true);
+        labelCodigoRegion.setForeground(Color.BLACK);
+        labelCodigoRegion.setBounds(10,510,100,60);
+        labelCodigoRegion.setFont(fuenteDeTexto2);
+        frameManejoDepartamentos.add(labelCodigoRegion);
+
+        JComboBox<String> combobxDepartamento = new JComboBox<>(devolverCodigosDepartamentos());
+        combobxDepartamento.setLayout(null);
+        combobxDepartamento.setVisible(true);
+        combobxDepartamento.setBounds(100,525,150,30);
+        combobxDepartamento.setFont(fuenteDeTexto2);
+        frameManejoDepartamentos.add(combobxDepartamento);
+
+        JLabel labelRenovacion = new JLabel("Atributo a Renovar:");
+        labelRenovacion.setLayout(null);
+        labelRenovacion.setVisible(true);
+        labelRenovacion.setForeground(Color.BLACK);
+        labelRenovacion.setBounds(260,510,150,60);
+        labelRenovacion.setFont(fuenteDeTexto2);
+        frameManejoDepartamentos.add(labelRenovacion);
+
+        String[] opcionesAtributos = {"Nombre"};
+        JComboBox<String> comboboxRenovar = new JComboBox<>(opcionesAtributos);
+        comboboxRenovar.setLayout(null);
+        comboboxRenovar.setVisible(true);
+        comboboxRenovar.setBounds(400,525,150,30);
+        comboboxRenovar.setFont(fuenteDeTexto2);
+        frameManejoDepartamentos.add(comboboxRenovar);
+
+        JLabel datoRenovado = new JLabel("Dato Renovado:");
+        datoRenovado.setLayout(null);
+        datoRenovado.setVisible(true);
+        datoRenovado.setForeground(Color.BLACK);
+        datoRenovado.setBounds(600,525,100,30);
+        datoRenovado.setFont(fuenteDeTexto2);
+        frameManejoDepartamentos.add(datoRenovado);
+
+        JTextField campoRenovar = new JTextField();
+        campoRenovar.setLayout(null);
+        campoRenovar.setVisible(true);
+        campoRenovar.setForeground(Color.BLACK);
+        campoRenovar.setBounds(700,525,150,30);
+        campoRenovar.setFont(fuenteDeTexto2);
+        frameManejoDepartamentos.add(campoRenovar);
+
+
+
+        JButton botonAcualizar = new JButton("Actualizar");
+        botonAcualizar.setLayout(null);
+        botonAcualizar.setVisible(true);
+        botonAcualizar.setBounds(100, 580, 200, 60);
+        botonAcualizar.setFont(fuenteDeTexto);
+        botonAcualizar.setBackground(Color.WHITE);
+        botonAcualizar.addMouseListener(new MouseAdapter(){
+            public void mouseClicked(MouseEvent e){
+                if(!Objects.equals(campoRenovar.getText(), "")){
+                    actualizarDepartamento(combobxDepartamento.getSelectedItem().toString(),campoRenovar.getText());
+                    JOptionPane.showMessageDialog(null,"<html><p style=\"color:blue; font:10px;\">Departamento Actualizado Con Éxito!</p></html>" );
+                    frameManejoDepartamentos.dispose();
+                    try {
+                        vistaAdmin();
+                    } catch (IOException ex) {
+                        throw new RuntimeException(ex);
+                    }
+
+                }else{
+                    JOptionPane.showMessageDialog(null,"<html><p style=\"color:red; font:10px;\">Debes llenar todos loc campos, si deseas actualizar datos!!</p></html>" );
+                }
+            }
+        });
+        frameManejoDepartamentos.add(botonAcualizar);
+
+        JButton botonEliminar = new JButton("Eliminar D.");
+        botonEliminar.setLayout(null);
+        botonEliminar.setVisible(true);
+        botonEliminar.setBounds(400, 580, 200, 60);
+        botonEliminar.setFont(fuenteDeTexto);
+        botonEliminar.setBackground(Color.WHITE);
+        botonEliminar.addMouseListener(new MouseAdapter(){
+            public void mouseClicked(MouseEvent e){
+                eliminarDepartamento(combobxDepartamento.getSelectedItem().toString());
+                JOptionPane.showMessageDialog(null,"<html><p style=\"color:blue; font:10px;\">Departamento Eliminado Con Éxito!</p></html>" );
+                frameManejoDepartamentos.dispose();
+                try {
+                    vistaAdmin();
+                } catch (IOException ex) {
+                    throw new RuntimeException(ex);
+                }
+            }
+        });
+        frameManejoDepartamentos.add(botonEliminar);
+
         frameManejoDepartamentos.repaint();
     }
 
@@ -1417,15 +1619,16 @@ public class InterfacesGraficas {
 
         //Fuente utilizada
         Font fuenteDeTexto =new Font("SansSerif",Font.BOLD,30);
+        Font fuenteDeTexto2 =new Font("SansSerif",Font.BOLD,12);
         // Creación del frame
         JFrame frameManejoMunicipios = new JFrame("Usac-Delivery");
         frameManejoMunicipios.setLayout(null);
         frameManejoMunicipios.setVisible(true);
-        frameManejoMunicipios.setResizable(false);
+        frameManejoMunicipios.setResizable(true);
         frameManejoMunicipios.getContentPane().setBackground(Color.LIGHT_GRAY);
         frameManejoMunicipios.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
         //Le agreamos un tamaño al frame login
-        frameManejoMunicipios.setSize(700,450);
+        frameManejoMunicipios.setSize(900,800);
 
 
 
@@ -1511,6 +1714,100 @@ public class InterfacesGraficas {
         });
         frameManejoMunicipios.add(botonAgregarKiosco);
 
+        JLabel labelCodigoRegion = new JLabel("Nombre Mun:");
+        labelCodigoRegion.setLayout(null);
+        labelCodigoRegion.setVisible(true);
+        labelCodigoRegion.setForeground(Color.BLACK);
+        labelCodigoRegion.setBounds(10,510,100,60);
+        labelCodigoRegion.setFont(fuenteDeTexto2);
+        frameManejoMunicipios.add(labelCodigoRegion);
+
+        JComboBox<String> combobxDepartamento = new JComboBox<>(devolverCodigosMunicipios());
+        combobxDepartamento.setLayout(null);
+        combobxDepartamento.setVisible(true);
+        combobxDepartamento.setBounds(100,525,150,30);
+        combobxDepartamento.setFont(fuenteDeTexto2);
+        frameManejoMunicipios.add(combobxDepartamento);
+
+        JLabel labelRenovacion = new JLabel("Atributo a Renovar:");
+        labelRenovacion.setLayout(null);
+        labelRenovacion.setVisible(true);
+        labelRenovacion.setForeground(Color.BLACK);
+        labelRenovacion.setBounds(260,510,150,60);
+        labelRenovacion.setFont(fuenteDeTexto2);
+        frameManejoMunicipios.add(labelRenovacion);
+
+        String[] opcionesAtributos = {"Nombre"};
+        JComboBox<String> comboboxRenovar = new JComboBox<>(opcionesAtributos);
+        comboboxRenovar.setLayout(null);
+        comboboxRenovar.setVisible(true);
+        comboboxRenovar.setBounds(400,525,150,30);
+        comboboxRenovar.setFont(fuenteDeTexto2);
+        frameManejoMunicipios.add(comboboxRenovar);
+
+        JLabel datoRenovado = new JLabel("Dato Renovado:");
+        datoRenovado.setLayout(null);
+        datoRenovado.setVisible(true);
+        datoRenovado.setForeground(Color.BLACK);
+        datoRenovado.setBounds(600,525,100,30);
+        datoRenovado.setFont(fuenteDeTexto2);
+        frameManejoMunicipios.add(datoRenovado);
+
+        JTextField campoRenovar = new JTextField();
+        campoRenovar.setLayout(null);
+        campoRenovar.setVisible(true);
+        campoRenovar.setForeground(Color.BLACK);
+        campoRenovar.setBounds(700,525,150,30);
+        campoRenovar.setFont(fuenteDeTexto2);
+        frameManejoMunicipios.add(campoRenovar);
+
+
+
+        JButton botonAcualizar = new JButton("Actualizar");
+        botonAcualizar.setLayout(null);
+        botonAcualizar.setVisible(true);
+        botonAcualizar.setBounds(100, 580, 200, 60);
+        botonAcualizar.setFont(fuenteDeTexto);
+        botonAcualizar.setBackground(Color.WHITE);
+        botonAcualizar.addMouseListener(new MouseAdapter(){
+            public void mouseClicked(MouseEvent e){
+                if(!Objects.equals(campoRenovar.getText(), "")){
+                    actualizarMunicipio(combobxDepartamento.getSelectedItem().toString(),campoRenovar.getText());
+                    JOptionPane.showMessageDialog(null,"<html><p style=\"color:blue; font:10px;\">Municipio Actualizado Con Éxito!</p></html>" );
+                    frameManejoMunicipios.dispose();
+                    try {
+                        vistaAdmin();
+                    } catch (IOException ex) {
+                        throw new RuntimeException(ex);
+                    }
+
+                }else{
+                    JOptionPane.showMessageDialog(null,"<html><p style=\"color:red; font:10px;\">Debes llenar todos loc campos, si deseas actualizar datos!!</p></html>" );
+                }
+            }
+        });
+        frameManejoMunicipios.add(botonAcualizar);
+
+        JButton botonEliminar = new JButton("Eliminar M.");
+        botonEliminar.setLayout(null);
+        botonEliminar.setVisible(true);
+        botonEliminar.setBounds(400, 580, 200, 60);
+        botonEliminar.setFont(fuenteDeTexto);
+        botonEliminar.setBackground(Color.WHITE);
+        botonEliminar.addMouseListener(new MouseAdapter(){
+            public void mouseClicked(MouseEvent e){
+                eliminarMunicipio(combobxDepartamento.getSelectedItem().toString());
+                JOptionPane.showMessageDialog(null,"<html><p style=\"color:blue; font:10px;\">Municipio Eliminado Con Éxito!</p></html>" );
+                frameManejoMunicipios.dispose();
+                try {
+                    vistaAdmin();
+                } catch (IOException ex) {
+                    throw new RuntimeException(ex);
+                }
+            }
+        });
+        frameManejoMunicipios.add(botonEliminar);
+
         frameManejoMunicipios.repaint();
     }
 
@@ -1519,15 +1816,16 @@ public class InterfacesGraficas {
 
         //Fuente utilizada
         Font fuenteDeTexto =new Font("SansSerif",Font.BOLD,30);
+        Font fuenteDeTexto2 =new Font("SansSerif",Font.BOLD,12);
         // Creación del frame
         JFrame frameManejoRegiones = new JFrame("Usac-Delivery");
         frameManejoRegiones.setLayout(null);
         frameManejoRegiones.setVisible(true);
-        frameManejoRegiones.setResizable(false);
+        frameManejoRegiones.setResizable(true);
         frameManejoRegiones.getContentPane().setBackground(Color.LIGHT_GRAY);
         frameManejoRegiones.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
         //Le agreamos un tamaño al frame login
-        frameManejoRegiones.setSize(1000,650);
+        frameManejoRegiones.setSize(1000,800);
 
 
 
@@ -1562,12 +1860,105 @@ public class InterfacesGraficas {
         scrollRegiones.setViewportView(tablaRegiones);
         frameManejoRegiones.add(scrollRegiones);
 
+        JLabel labelCodigoRegion = new JLabel("Cod. Region:");
+        labelCodigoRegion.setLayout(null);
+        labelCodigoRegion.setVisible(true);
+        labelCodigoRegion.setForeground(Color.BLACK);
+        labelCodigoRegion.setBounds(10,410,100,60);
+        labelCodigoRegion.setFont(fuenteDeTexto2);
+        frameManejoRegiones.add(labelCodigoRegion);
+
+        JComboBox<String> comboboxRegion = new JComboBox<>(devolverCodigosRegiones());
+        comboboxRegion.setLayout(null);
+        comboboxRegion.setVisible(true);
+        comboboxRegion.setBounds(100,425,150,30);
+        comboboxRegion.setFont(fuenteDeTexto2);
+        frameManejoRegiones.add(comboboxRegion);
+
+        JLabel labelRenovacion = new JLabel("Atributo a Renovar:");
+        labelRenovacion.setLayout(null);
+        labelRenovacion.setVisible(true);
+        labelRenovacion.setForeground(Color.BLACK);
+        labelRenovacion.setBounds(260,410,150,60);
+        labelRenovacion.setFont(fuenteDeTexto2);
+        frameManejoRegiones.add(labelRenovacion);
+
+        String[] opcionesAtributos = {"Nombre", "PrecioNormal","PrecioEspecial"};
+        JComboBox<String> comboboxRenovar = new JComboBox<>(opcionesAtributos);
+        comboboxRenovar.setLayout(null);
+        comboboxRenovar.setVisible(true);
+        comboboxRenovar.setBounds(400,425,150,30);
+        comboboxRenovar.setFont(fuenteDeTexto2);
+        frameManejoRegiones.add(comboboxRenovar);
+
+        JLabel datoRenovado = new JLabel("Dato Renovado:");
+        datoRenovado.setLayout(null);
+        datoRenovado.setVisible(true);
+        datoRenovado.setForeground(Color.BLACK);
+        datoRenovado.setBounds(600,420,100,30);
+        datoRenovado.setFont(fuenteDeTexto2);
+        frameManejoRegiones.add(datoRenovado);
+
+        JTextField campoRenovar = new JTextField();
+        campoRenovar.setLayout(null);
+        campoRenovar.setVisible(true);
+        campoRenovar.setForeground(Color.BLACK);
+        campoRenovar.setBounds(700,425,150,30);
+        campoRenovar.setFont(fuenteDeTexto2);
+        frameManejoRegiones.add(campoRenovar);
+
+
+
+        JButton botonAcualizar = new JButton("Actualizar");
+        botonAcualizar.setLayout(null);
+        botonAcualizar.setVisible(true);
+        botonAcualizar.setBounds(250, 550, 200, 60);
+        botonAcualizar.setFont(fuenteDeTexto);
+        botonAcualizar.setBackground(Color.WHITE);
+        botonAcualizar.addMouseListener(new MouseAdapter(){
+            public void mouseClicked(MouseEvent e){
+                if(!Objects.equals(campoRenovar.getText(), "")){
+                    actualizarRegion(comboboxRegion.getSelectedItem().toString(),comboboxRenovar.getSelectedItem().toString(),campoRenovar.getText());
+                    JOptionPane.showMessageDialog(null,"<html><p style=\"color:blue; font:10px;\">Region Actualizada Con Éxito!</p></html>" );
+                    frameManejoRegiones.dispose();
+                    try {
+                        vistaAdmin();
+                    } catch (IOException ex) {
+                        throw new RuntimeException(ex);
+                    }
+
+                }else{
+                    JOptionPane.showMessageDialog(null,"<html><p style=\"color:red; font:10px;\">Debes llenar todos loc campos, si deseas actualizar datos!!</p></html>" );
+                }
+            }
+        });
+        frameManejoRegiones.add(botonAcualizar);
+
+        JButton botonEliminar = new JButton("Eliminar R.");
+        botonEliminar.setLayout(null);
+        botonEliminar.setVisible(true);
+        botonEliminar.setBounds(550, 550, 200, 60);
+        botonEliminar.setFont(fuenteDeTexto);
+        botonEliminar.setBackground(Color.WHITE);
+        botonEliminar.addMouseListener(new MouseAdapter(){
+            public void mouseClicked(MouseEvent e){
+                eliminarRegion(comboboxRegion.getSelectedItem().toString());
+                JOptionPane.showMessageDialog(null,"<html><p style=\"color:blue; font:10px;\">Region Eliminada Con Éxito!</p></html>" );
+                frameManejoRegiones.dispose();
+                try {
+                    vistaAdmin();
+                } catch (IOException ex) {
+                    throw new RuntimeException(ex);
+                }
+            }
+        });
+        frameManejoRegiones.add(botonEliminar);
 
 
         JButton botonRegresar = new JButton("Volver");
         botonRegresar.setLayout(null);
         botonRegresar.setVisible(true);
-        botonRegresar.setBounds(400, 450, 200, 60);
+        botonRegresar.setBounds(400, 650, 200, 60);
         botonRegresar.setFont(fuenteDeTexto);
         botonRegresar.setBackground(Color.WHITE);
         botonRegresar.addMouseListener(new MouseAdapter(){
@@ -1596,7 +1987,7 @@ public class InterfacesGraficas {
         JFrame frameManejoReportes = new JFrame("Usac-Delivery");
         frameManejoReportes.setLayout(null);
         frameManejoReportes.setVisible(true);
-        frameManejoReportes.setResizable(false);
+        frameManejoReportes.setResizable(true);
         frameManejoReportes.getContentPane().setBackground(Color.LIGHT_GRAY);
         frameManejoReportes.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
         //Le agreamos un tamaño al frame login
@@ -1719,7 +2110,7 @@ public class InterfacesGraficas {
         JFrame frameVistaUsuario = new JFrame("Usac-Delivery");
         frameVistaUsuario.setLayout(null);
         frameVistaUsuario.setVisible(true);
-        frameVistaUsuario.setResizable(false);
+        frameVistaUsuario.setResizable(true);
         frameVistaUsuario.getContentPane().setBackground(Color.LIGHT_GRAY);
         frameVistaUsuario.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
         //Le agreamos un tamaño al frame login
@@ -1845,7 +2236,7 @@ public class InterfacesGraficas {
         JFrame frameManejoTarjetas = new JFrame("Usac-Delivery");
         frameManejoTarjetas.setLayout(null);
         frameManejoTarjetas.setVisible(true);
-        frameManejoTarjetas.setResizable(false);
+        frameManejoTarjetas.setResizable(true);
         frameManejoTarjetas.getContentPane().setBackground(Color.LIGHT_GRAY);
         frameManejoTarjetas.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
         //Le agreamos un tamaño al frame login
@@ -1936,7 +2327,7 @@ public class InterfacesGraficas {
         JFrame frameAgregarTarjeta = new JFrame("Usac-Delivery");
         frameAgregarTarjeta.setLayout(null);
         frameAgregarTarjeta.setVisible(true);
-        frameAgregarTarjeta.setResizable(false);
+        frameAgregarTarjeta.setResizable(true);
         frameAgregarTarjeta.getContentPane().setBackground(Color.LIGHT_GRAY);
         frameAgregarTarjeta.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
         //Le agreamos un tamaño al frame login
@@ -2113,7 +2504,7 @@ public class InterfacesGraficas {
         JFrame frameManejoDatosFacturacion = new JFrame("Usac-Delivery");
         frameManejoDatosFacturacion.setLayout(null);
         frameManejoDatosFacturacion.setVisible(true);
-        frameManejoDatosFacturacion.setResizable(false);
+        frameManejoDatosFacturacion.setResizable(true);
         frameManejoDatosFacturacion.getContentPane().setBackground(Color.LIGHT_GRAY);
         frameManejoDatosFacturacion.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
         //Le agreamos un tamaño al frame login
@@ -2203,7 +2594,7 @@ public class InterfacesGraficas {
         JFrame frameAgregarDatoFacturacion = new JFrame("Usac-Delivery");
         frameAgregarDatoFacturacion.setLayout(null);
         frameAgregarDatoFacturacion.setVisible(true);
-        frameAgregarDatoFacturacion.setResizable(false);
+        frameAgregarDatoFacturacion.setResizable(true);
         frameAgregarDatoFacturacion.getContentPane().setBackground(Color.LIGHT_GRAY);
         frameAgregarDatoFacturacion.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
         //Le agreamos un tamaño al frame login
@@ -2328,7 +2719,7 @@ public class InterfacesGraficas {
         JFrame frameCotizaciones = new JFrame("USAC-DELIVERY");
         frameCotizaciones.setLayout(null);
         frameCotizaciones.setVisible(true);
-        frameCotizaciones.setResizable(false);
+        frameCotizaciones.setResizable(true);
         frameCotizaciones.getContentPane().setBackground(Color.LIGHT_GRAY);
         frameCotizaciones.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
         Toolkit myScreen= Toolkit.getDefaultToolkit();
@@ -2797,7 +3188,7 @@ public class InterfacesGraficas {
         JFrame frameManejoDescargasEnvios = new JFrame("Usac-Delivery");
         frameManejoDescargasEnvios.setLayout(null);
         frameManejoDescargasEnvios.setVisible(true);
-        frameManejoDescargasEnvios.setResizable(false);
+        frameManejoDescargasEnvios.setResizable(true);
         frameManejoDescargasEnvios.getContentPane().setBackground(Color.LIGHT_GRAY);
         frameManejoDescargasEnvios.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
         //Le agreamos un tamaño al frame login
