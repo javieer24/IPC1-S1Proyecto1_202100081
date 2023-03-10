@@ -25,7 +25,7 @@ public class InterfacesGraficas {
     static double ingresosTotales=0.00;
     static int totalEnviosGeneral=0;
 
-    static String correoAdmin="ipc@gmail.com";
+    static String correoAdmin="ipc1_202100081@ipc1delivery.com";
     static String passAdmin="1234";
     static int numeroFactura=0;
 
