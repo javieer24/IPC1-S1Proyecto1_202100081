@@ -11,7 +11,7 @@ import java.util.Objects;
 
 
 public class InterfacesGraficas {
-    static String almacenamiento = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_";
+    static String almacenamiento = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_/¿?¡!ñÑ=*-.[]´";
 
     static ArrayList<Kiosco> kioscos = new ArrayList<>();
     static ArrayList<Region> regiones = new ArrayList<>();
