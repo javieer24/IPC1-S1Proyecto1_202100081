@@ -1,8 +1,8 @@
 # IPC1-S1Proyecto1_202100081
-#NOMBRE ALUMNO
+#NOMBRE ALUMNO: 
 Javier Andrés Monjes Solórzano  
-#Carné
+#Carné:
 202100081
-Nombre del Curso y sección
+#Nombre del Curso y sección:
 Introducción a la Prgramación de Computadoras 1 Sección E
 
