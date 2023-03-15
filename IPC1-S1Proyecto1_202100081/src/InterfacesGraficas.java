@@ -11,7 +11,7 @@ import java.util.Objects;
 
 
 public class InterfacesGraficas {
-    static String almacenamiento = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_/¿?¡!ñÑ=*-.[]()´";
+    static String almacenamiento = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_";
 
     static ArrayList<Kiosco> kioscos = new ArrayList<>();
     static ArrayList<Region> regiones = new ArrayList<>();
@@ -25,8 +25,8 @@ public class InterfacesGraficas {
     static double ingresosTotales=0.00;
     static int totalEnviosGeneral=0;
 
-    static String correoAdmin="ipc1_202100081@ipc1delivery.com";
-    static String passAdmin="202100081";
+    static String correoAdmin="ipc@gmail.com";
+    static String passAdmin="1234";
     static int numeroFactura=0;
 
 
@@ -34,6 +34,11 @@ public class InterfacesGraficas {
         inicializarRegiones();
         inicioDeSesion();
     }
+
+    public static boolean esNumero(String cadena) {
+        return cadena.matches("\\d+");
+    }
+
 
     public static void generarHtmlFactura(String codigo){
         java.io.FileWriter htmlArchivo = null;
@@ -126,7 +131,7 @@ public class InterfacesGraficas {
                     + "<title>Cotizacion</title> <script src=\"https://cdn.jsdelivr.net/jsbarcode/3.6.0/JsBarcode.all.min.js\"></script>\n"
                     + "</head>\n"
                     + "\n"
-                    + "<body bgcolor=”#6CFC07”>\n"
+                    + "<body bgcolor=\"#6CFC07\">\n"
                     + "\n"
                     + "<center>");
             escritor.println("<h1>" + "Guia De Envio: </h1></center>\n");
@@ -139,7 +144,7 @@ public class InterfacesGraficas {
             escritor.println("<svg id=\"barcode\"></svg>\n" +
                     "\t<script>\n" +
                     "\t\tJsBarcode(\"#barcode\", \""+envioTemp.getDatosGuia().get(0)+"\", {\n" +
-                    "\t\t\tformat: \"ean13\",\n" +
+                    "\t\t\tformat: \"code128\",\n" +
                     "\t\t\tdisplayValue: true,\n" +
                     "\t\t\ttextAlign: \"center\",\n" +
                     "\t\t\ttextPosition: \"bottom\",\n" +
@@ -2450,20 +2455,23 @@ public class InterfacesGraficas {
         botonAgregarTarjeta.addMouseListener(new MouseAdapter(){
             public void mouseClicked(MouseEvent e){
                 if(!Objects.equals(campoNombre.getText(), "") && !Objects.equals(campoNumero.getText(), "") && !Objects.equals(campoAnio.getText(), "") && !Objects.equals(campoDia.getText(), "")  && !Objects.equals(campoMes.getText(), "")){
-                    for (Usuario usuario : usuarios) {
-                        if (Objects.equals(usuario.getDpi(), dpiLoggeado)) {
-                            usuario.getTarjetas().add(new Tarjeta(campoNombre.getText(),comboboxTipo.getSelectedItem().toString(),campoDia.getText()+"/"+campoMes.getText()+"/"+campoAnio.getText(),campoNumero.getText()));
-                            break;
+                    if(esNumero(campoNumero.getText())){
+                        for (Usuario usuario : usuarios) {
+                            if (Objects.equals(usuario.getDpi(), dpiLoggeado)) {
+                                usuario.getTarjetas().add(new Tarjeta(campoNombre.getText(),comboboxTipo.getSelectedItem().toString(),campoDia.getText()+"/"+campoMes.getText()+"/"+campoAnio.getText(),campoNumero.getText()));
+                                break;
+                            }
                         }
+                        JOptionPane.showMessageDialog(null,"<html><p style=\"color:blue; font:10px;\">Tarjeta Registrada con éxito!!</p></html>" );
+                        frameAgregarTarjeta.dispose();
+                        try {
+                            manejoTarjetas();
+                        } catch (IOException ex) {
+                            throw new RuntimeException(ex);
+                        }
+                    }else{
+                        JOptionPane.showMessageDialog(null,"<html><p style=\"color:blue; font:10px;\">Debes ingresar un número válido de tarjeta</p></html>" );
                     }
-                    JOptionPane.showMessageDialog(null,"<html><p style=\"color:blue; font:10px;\">Tarjeta Registrada con éxito!!</p></html>" );
-                    frameAgregarTarjeta.dispose();
-                    try {
-                        manejoTarjetas();
-                    } catch (IOException ex) {
-                        throw new RuntimeException(ex);
-                    }
-
                 }else{
                     JOptionPane.showMessageDialog(null,"<html><p style=\"color:blue; font:10px;\">Debes llenar todos los campos para registrar la tarjeta!!</p></html>" );
                 }
@@ -3021,53 +3029,58 @@ public class InterfacesGraficas {
                 if(!Objects.equals(campoDireccionOrigen.getText(), "") && !Objects.equals(campoDireccionOrigen.getText(), "") && !Objects.equals(campoPaquetesAEnviar.getText(), "") && !Objects.equals(campoPeso.getText(), "")){
                     if(Objects.equals(comboboxTipoPago.getSelectedItem().toString(), "Tarjeta") && !Objects.equals(comboboxEscogerTarjeta.getSelectedItem().toString(), "No-Aplica")){
                         if(!Objects.equals(campoCvv.getText(), "")){
-                            java.util.Random rand = new java.util.Random();
-                            String cadenaAleatoria = "IPC1E";
-                            int n = almacenamiento.length();
-                            for (int i = 0; i < 5; i++) {
-                                cadenaAleatoria += almacenamiento.charAt(rand.nextInt(n));
-                            }
-                            ArrayList<String> datosFactura=new ArrayList<>();
-                            ArrayList<String> datosGuia=new ArrayList<>();
-
-                            //Factura
-                            datosFactura.add(String.valueOf(numeroFactura));
-                            numeroFactura++;
-                            datosFactura.add(cadenaAleatoria);
-                            datosFactura.add(campoDireccionOrigen.getText());
-                            datosFactura.add(campoDireccionDestino.getText());
-                            datosFactura.add(comboboxDatosFacturacion.getSelectedItem().toString());
-                            datosFactura.add(comboboxTipoPago.getSelectedItem().toString());
-                            datosFactura.add(campoPeso.getText());
-                            datosFactura.add(campoPaquetesAEnviar.getText());
-                            datosFactura.add(String.valueOf(totalCotizacion));
-                            //Guia
-                            datosGuia.add(cadenaAleatoria);
-                            datosGuia.add(campoDireccionOrigen.getText());
-                            datosGuia.add(campoDireccionDestino.getText());
-                            datosGuia.add(comboboxTipoPago.getSelectedItem().toString());
-                            datosGuia.add(campoPeso.getText());
-                            datosGuia.add(campoPaquetesAEnviar.getText());
-                            java.time.LocalDate fechaActual=java.time.LocalDate.now();
-                            datosGuia.add(fechaActual.toString());
-                            datosGuia.add(String.valueOf(totalCotizacion));
-                            for (Usuario usuario : usuarios) {
-                                if (Objects.equals(usuario.getDpi(), dpiLoggeado)) {
-                                    usuario.getEnvios().add(new Envio(cadenaAleatoria,comboboxTipoPrecio.getSelectedItem().toString(),campoDireccionDestino.getText(),totalCotizacion,comboboxTipoPago.getSelectedItem().toString(),datosFactura,datosGuia));
-                                    usuario.setPaquetesEnviados(usuario.getPaquetesEnviados()+Integer.parseInt(campoPaquetesAEnviar.getText()));
-                                    break;
+                            if(esNumero(campoCvv.getText())){
+                                java.util.Random rand = new java.util.Random();
+                                String cadenaAleatoria = "IPC1E";
+                                int n = almacenamiento.length();
+                                for (int i = 0; i < 5; i++) {
+                                    cadenaAleatoria += almacenamiento.charAt(rand.nextInt(n));
                                 }
+                                ArrayList<String> datosFactura=new ArrayList<>();
+                                ArrayList<String> datosGuia=new ArrayList<>();
+
+                                //Factura
+                                datosFactura.add(String.valueOf(numeroFactura));
+                                numeroFactura++;
+                                datosFactura.add(cadenaAleatoria);
+                                datosFactura.add(campoDireccionOrigen.getText());
+                                datosFactura.add(campoDireccionDestino.getText());
+                                datosFactura.add(comboboxDatosFacturacion.getSelectedItem().toString());
+                                datosFactura.add(comboboxTipoPago.getSelectedItem().toString());
+                                datosFactura.add(campoPeso.getText());
+                                datosFactura.add(campoPaquetesAEnviar.getText());
+                                datosFactura.add(String.valueOf(totalCotizacion));
+                                //Guia
+                                datosGuia.add(cadenaAleatoria);
+                                datosGuia.add(campoDireccionOrigen.getText());
+                                datosGuia.add(campoDireccionDestino.getText());
+                                datosGuia.add(comboboxTipoPago.getSelectedItem().toString());
+                                datosGuia.add(campoPeso.getText());
+                                datosGuia.add(campoPaquetesAEnviar.getText());
+                                java.time.LocalDate fechaActual=java.time.LocalDate.now();
+                                datosGuia.add(fechaActual.toString());
+                                datosGuia.add(String.valueOf(totalCotizacion));
+                                for (Usuario usuario : usuarios) {
+                                    if (Objects.equals(usuario.getDpi(), dpiLoggeado)) {
+                                        usuario.getEnvios().add(new Envio(cadenaAleatoria,comboboxTipoPrecio.getSelectedItem().toString(),campoDireccionDestino.getText(),totalCotizacion,comboboxTipoPago.getSelectedItem().toString(),datosFactura,datosGuia));
+                                        usuario.setPaquetesEnviados(usuario.getPaquetesEnviados()+Integer.parseInt(campoPaquetesAEnviar.getText()));
+                                        break;
+                                    }
+                                }
+                                agregarEnvioRegion(comboboxDepartamentoOrigen.getSelectedItem().toString());
+                                totalEnviosGeneral+=Integer.parseInt(campoPaquetesAEnviar.getText());
+                                ingresosTotales+=totalCotizacion;
+                                JOptionPane.showMessageDialog(null,"<html><p style=\"color:blue; font:10px;\">Compra Realizada con éxito!!</p></html>" );
+                                frameCotizaciones.dispose();
+                                try {
+                                    vistaUsuario();
+                                } catch (IOException e) {
+                                    throw new RuntimeException(e);
+                                }
+                            }else{
+                                JOptionPane.showMessageDialog(null,"<html><p style=\"color:blue; font:10px;\">Debes colocar un número cvv válido!! (Solo números)</p></html>" );
                             }
-                            agregarEnvioRegion(comboboxDepartamentoOrigen.getSelectedItem().toString());
-                            totalEnviosGeneral+=Integer.parseInt(campoPaquetesAEnviar.getText());
-                            ingresosTotales+=totalCotizacion;
-                            JOptionPane.showMessageDialog(null,"<html><p style=\"color:blue; font:10px;\">Compra Realizada con éxito!!</p></html>" );
-                            frameCotizaciones.dispose();
-                            try {
-                                vistaUsuario();
-                            } catch (IOException e) {
-                                throw new RuntimeException(e);
-                            }
+
 
 
                         }else{
