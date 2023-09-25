@@ -4,5 +4,5 @@ Javier Andrés Monjes Solórzano
 ## Carné:
 202100081
 ## Nombre del Curso y sección:
-Introducción a la Prgramación de Computadoras 1 Sección E
+Introducción a la Programación de Computadoras 1 Sección E
 
